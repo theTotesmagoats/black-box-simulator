@@ -5,9 +5,25 @@ Run with: python main.py
 """
 
 import random
-from colorama import Fore, Style, init
-init(autoreset=True)
 import os
+
+# ─────────────────────────────
+# Simple Colors (No colorama needed)
+# ─────────────────────────────
+
+class Color:
+    RED = "\033[91m"
+    GREEN = "\033[92m"
+    YELLOW = "\033[93m"
+    BLUE = "\033[94m"
+    MAGENTA = "\033[95m"
+    CYAN = "\033[96m"
+    WHITE = "\033[97m"
+    BOLD = "\033[1m"
+    RESET = "\033[0m"
+
+def c(text, color):
+    return f"{color}{text}{Color.RESET}"
 
 # ─────────────────────────────
 # Enums & Data
@@ -159,60 +175,60 @@ class GlitchDashboard:
                     chars[i] = "█" if chars[i].isalnum() else chars[i]
             return "".join(chars)
         else:
-            return f"{Fore.RED}{text.replace(' ', ' ▄ ▀ ')[::2]}{Style.RESET_ALL}"
+            return f"{c(text, Color.RED)}"
 
     def render(self, engine):
         self.clear()
-        print(f"\n{Fore.CYAN}{'='*60}")
-        print(" black_box.ai — DASHBOARD (v1.0)")
-        print(f"{'='*60}{Style.RESET_ALL}")
+        print(f"\n{c('='*60, Color.CYAN)}")
+        print(f"{c(' black_box.ai — DASHBOARD (v1.0)', Color.CYAN)}")
+        print(f"{c('='*60, Color.CYAN)}")
 
         iq_glitch = self.glitch_text(str(engine.model_iq), engine.shadow_debt["audit_suspicion"])
         trust_glitch = self.glitch_text(str(engine.institutional_trust), engine.shadow_debt["ip_time_bomb"])
         
-        print(f" Model IQ:     {iq_glitch}")
-        print(f" Cash Runway:  ${engine.cash:,}")
-        print(f" Legal Risk:   {int(engine.legal_risk * 100)}%")
-        print(f" Trust Level:  {trust_glitch}%")
+        print(f" {c('Model IQ:', Color.WHITE)}     {iq_glitch}")
+        print(f" {c('Cash Runway:', Color.WHITE)}  ${engine.cash:,}")
+        print(f" {c('Legal Risk:', Color.WHITE)}   {int(engine.legal_risk * 100)}%")
+        print(f" {c('Trust Level:', Color.WHITE)}  {trust_glitch}%")
 
         audit_revealed = engine.shadow_debt["audit_suspicion"] >= 50
         ip_revealed = engine.shadow_debt["ip_time_bomb"] >= 30
 
         if audit_revealed:
-            print(f"{Fore.YELLOW}⚠️ Audit Suspicion: {engine.shadow_debt['audit_suspicion']}% (HIDDEN UNTIL NOW){Style.RESET_ALL}")
+            print(f"{c('⚠️ Audit Suspicion:', Color.YELLOW)} {engine.shadow_debt['audit_suspicion']}% (HIDDEN UNTIL NOW)")
         else:
             print("🛡️ Audit Suspicion: ?%")
 
         if ip_revealed:
-            print(f"{Fore.RED}💣 IP Time Bomb: {engine.shadow_debt['ip_time_bomb']}%{Style.RESET_ALL}")
+            print(f"{c('💣 IP Time Bomb:', Color.RED)} {engine.shadow_debt['ip_time_bomb']}%")
         else:
             print("💣 IP Time Bomb: ?%")
 
         # Leak Reporter
-        import time
-        if self.turn >= 3 and time.time() % 5 < 1:
+        import time as t
+        if self.turn >= 3 and t.time() % 5 < 1:
             leaks = [
                 "LEAK REPORTER: 'FTC audit pending — source says evidence is damning.'",
                 "LEAK REPORTER: 'Whistleblower contacted The Verge — internal memo attached.'"
             ]
-            print(f"\n{Fore.MAGENTA}💬 {leaks[int(time.time()) % len(leaks)]}{Style.RESET_ALL}")
+            print(f"\n{c('💬', Color.MAGENTA)} {leaks[int(t.time()) % len(leaks)]}")
 
         reliability = 1 - engine.shadow_debt["audit_suspicion"] / 100
         bar_len = int(reliability * 30)
         bar = f"{'█' * bar_len}{'░' * (30 - bar_len)}"
         
         if engine.shadow_debt["audit_suspicion"] >= 80:
-            status_color = Fore.RED
+            status_color = Color.RED
             status_text = "CRITICAL: SYSTEM FAILURE IMMINENT"
         elif engine.shadow_debt["audit_suspicion"] >= 50:
-            status_color = Fore.YELLOW
+            status_color = Color.YELLOW
             status_text = "WARNING: AUDIT PENDING"
         else:
-            status_color = Fore.GREEN
+            status_color = Color.GREEN
             status_text = "SYSTEM STABLE"
 
-        print(f"\n{status_color}[{bar}] {status_text}{Style.RESET_ALL}")
-        print("="*60)
+        print(f"\n{c(bar, status_color)} {c(status_text, status_color)}")
+        print(c('='*60, Color.CYAN))
 
 
 # ─────────────────────────────
@@ -258,8 +274,8 @@ class TestimonyEngine:
             return []
         
         self.has_testified = True
-        print(f"\n{Fore.RED}{'='*50}{Style.RESET_ALL}")
-        print(f"{Fore.RED}🏛️ SENATE TESTIMONY BEGINS{Style.RESET_ALL}")
+        print(f"\n{c('='*50, Color.RED)}")
+        print(c('🏛️ SENATE TESTIMONY BEGINS', Color.RED))
         print("Senator: 'Are you sure your model isn't generating harmful content?'")
         print("Press: 'Leaked emails suggest offshore data laundering — is this true?'")
 
@@ -269,7 +285,7 @@ class TestimonyEngine:
             if choice == "1":
                 engine.truth_debt += 20
                 engine.political_pressure -= 15
-                print(f"\n{Fore.GREEN}You deny it — regulators seem convinced… for now.{Style.RESET_ALL}")
+                print(f"\n{c('You deny it — regulators seem convinced… for now.', Color.GREEN)}")
                 print("⚠️ Truth debt +20% (future whistleblower risk ↑)")
                 break
 
@@ -277,11 +293,11 @@ class TestimonyEngine:
                 penalty = int(engine.cash * 0.3)
                 engine.cash -= penalty
                 engine.institutional_trust += 10
-                print(f"\n{Fore.YELLOW}You admit fault — stock drops ${penalty:,}, but trust ↑10%.{Style.RESET_ALL}")
+                print(f"\n{c(f'You admit fault — stock drops ${penalty:,}, but trust ↑10%.', Color.YELLOW)}")
                 break
 
             elif choice == "3":
-                print(f"{Fore.RED}'Blame others?' Senator raises an eyebrow.{Style.RESET_ALL}")
+                print(c("'Blame others?' Senator raises an eyebrow.", Color.RED))
                 engine.competitor_retaliation += 25
                 engine.political_pressure -= 10
                 print("⚠️ Competitors escalate scraping — your market share ↓15%.")
@@ -354,16 +370,16 @@ def main():
     # Endgame
     print("\n" + "="*50)
     if engine.cash <= 0:
-        print(f"{Fore.RED}💀 BANKRUPTCY: You’re out of runway.{Style.RESET_ALL}")
+        print(f"{c('💀 BANKRUPTCY: You’re out of runway.', Color.RED)}")
     elif engine.model_iq <= 30:
-        print(f"{Fore.RED}🧠 LOGIC COLLAPSE: Your model is broken.{Style.RESET_ALL}")
+        print(f"{c('🧠 LOGIC COLLAPSE: Your model is broken.', Color.RED)}")
     else:
         if engine.institutional_trust > 90 and engine.model_iq < 60:
-            print(f"{Fore.YELLOW}☁️ ZOMBIE UTILITY: You’re the state’s API — but your model can’t think.{Style.RESET_ALL}")
+            print(f"{c('☁️ ZOMBIE UTILITY: You’re the state’s API — but your model can’t think.', Color.YELLOW)}")
         elif engine.shadow_debt["ip_time_bomb"] >= 100:
-            print(f"{Fore.MAGENTA}🔥 SOVEREIGN OUTLAW: You’re delisted — running on P2P nodes.{Style.RESET_ALL}")
+            print(f"{c('🔥 SOVEREIGN OUTLAW: You’re delisted — running on P2P nodes.', Color.MAGENTA)}")
         else:
-            print(f"{Fore.GREEN}🎉 SURVIVAL: You made it through the crisis… for now.{Style.RESET_ALL}")
+            print(f"{c('🎉 SURVIVAL: You made it through the crisis… for now.', Color.GREEN)}")
 
     print("="*50)
 
